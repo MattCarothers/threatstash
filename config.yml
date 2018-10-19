@@ -1,0 +1,70 @@
+# Example configuration file #
+##############################
+
+# Global plugin configuration.  Anything set here applies to all plugins.
+global:
+  example: Example global configuration
+
+# Example configuration that applies to all instances of a plugin.
+# Configuration in the plugin list will override it.
+filter-misp-warning:
+    revoke: true
+
+# List of plugins to run, and the configuration for each plugin instance
+plugins:
+  # Grab a blog of text from stdin
+  - name: input-stdin
+
+  # Parse freeform text, extract indicators, and defang them
+  - name: filter-freeform
+
+  # Compare indicators to the MISP warning lists for hostnames
+  # See git clone https://github.com/MISP/misp-warninglists
+  - name: filter-misp-warning
+    # Configuration for this instance of this plugin
+    # If revoke is set to true, the indicator will be removed.  If set to
+    # false, a sighting will be added for it.
+    revoke: false
+    warning_list_dir: ./misp-warninglists
+    warning_lists: [
+      alexa, automated-malware-analysis, bank-website, cisco_top1000, google,
+      microsoft, microsoft-attack-simulator, microsoft-office365,
+      microsoft-win10-connection-endpoints, public-dns-hostname, rfc6761,
+      second-level-tlds, security-provider-blogpost, tlds, url-shortener,
+      whats-my-ip
+    ]
+
+  # Extract IPs from hostnames using FarSight DNSDB
+#  - name: filter-pdns
+#    apikey: your_key_here
+
+  # Run indicators past the warning lists that relate to IPs or CIDRs
+  - name: filter-misp-warning
+    revoke: false
+    warning_list_dir: ./misp-warninglists
+    warning_lists: [
+       amazon-aws, ipv6-linklocal, microsoft-attack-simulator, microsoft-azure,
+       microsoft-office365, microsoft-office365-cn, multicast, ovh-cluster,
+       public-dns-v4, public-dns-v6, rfc1918, rfc3849, rfc5735, rfc6598,
+       sinkholes
+    ]
+
+  # Check the OIL
+  # See https://github.com/MattCarothers/oil-netflow
+#  - name: filter-oil-redis
+#    server: 172.17.0.2
+#    namespace: oil
+
+  # Check Moloch using its API for any domain with an IP seen in OIL
+#  - name: filter-moloch
+#    url: https://moloch.yourcompany.com
+#    username: your_username
+#    password: your_password
+    # Don't check Moloch for any  IP sighted more than max_age days ago
+#    max_age: 30
+    # Verify the TLS certificate?
+    # Verify can be true, false, or a directory with your CA cert
+#    verify: /etc/ssl/certs
+
+  # Output a CSV file
+  - name: output-stdout-csv
