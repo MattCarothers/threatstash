@@ -31,6 +31,8 @@ pip3 install -r requirements.txt
 git clone https://github.com/MISP/misp-warninglists
 echo '8[.]8[.]8[.]8' | ./threatstash.py -q config.yml
 ```
+## Under the hood
+Threatstash uses a [STIX 2 Environment](https://stix2.readthedocs.io/en/latest/guide/environment.html) internally.  Each IOC is a [STIX ObservedData](https://stix2.readthedocs.io/en/latest/api/stix2.v20.sdo.html) object containing a [STIX Observable](https://stix2.readthedocs.io/en/latest/api/stix2.v20.observables.html).  While this complicates the code, it also allows Threatstash to understand relationships between IOCs using [STIX Relationship](https://stix2.readthedocs.io/en/latest/api/stix2.v20.sro.html) objects and sightings using [STIX Sighting](https://stix2.readthedocs.io/en/latest/api/stix2.v20.sro.html) objects.  The threatstash.Event API hides most of the STIX complexity by providing simpler methods and works around issues such as the inability to modify or remove an object once it's been added to the Environment.  Using STIX internally should also make it relatively easy to write input or output plugins that work dircectly with STIX should someone wish to tackle that.
 
 ## Writing new filters
 To write a new plugin, start with plugins/filter-dummy.py or one of the other examples.
@@ -40,9 +42,7 @@ Import the Plugin superclass:
 import threatstash.plugin
 ```
 
-Set the plugin's name, type, ioc types, and required parameters.  The plugin will only be run against observables matching the IOC types list.  
-
-Valid IOC types are derived from [STIX 2 Observables](http://docs.oasis-open.org/cti/stix/v2.0/cs01/part4-cyber-observable-objects/stix-v2.0-cs01-part4-cyber-observable-objects.html#_Toc496716217).
+Set the plugin's name, type, ioc types, and required parameters.  The plugin will only be run against observables matching the IOC types list.  Valid IOC types are derived from [STIX 2 Observables](http://docs.oasis-open.org/cti/stix/v2.0/cs01/part4-cyber-observable-objects/stix-v2.0-cs01-part4-cyber-observable-objects.html#_Toc496716217):
 * autonomous-system
 * domain-name
 * email-addr
