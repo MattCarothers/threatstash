@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import SubnetTree
 from tld import get_tld, get_fld

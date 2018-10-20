@@ -1,7 +1,4 @@
-import logging
-
 import threatstash.plugin
-import threatstash.util
 
 # Dummy plugin for testing
 

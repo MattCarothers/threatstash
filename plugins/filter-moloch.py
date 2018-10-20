@@ -1,7 +1,6 @@
 import datetime
 import dateutil.parser
 import json
-import logging
 import requests
 import urllib
 
