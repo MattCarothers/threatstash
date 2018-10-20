@@ -14,7 +14,7 @@ class Dummy(threatstash.plugin.Plugin):
     def run(self, event):
         for observable in event.observables:
             if observable.type == "domain-name":
-                self.debug("Adding relationship: " + observable.value + " resolves_to 1.2.3.4")
+                self.debug("Adding relationship:", observable.value, "resolves_to 1.2.3.4")
                 new_observed_data = event.add_observation("ipv4-addr",
                         "1.2.3.4", added_by=__PLUGIN_NAME__)
                 event.add_relationship(observable.id, new_observed_data,
