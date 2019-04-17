@@ -60,6 +60,8 @@ plugins:
 #    url: https://moloch.yourcompany.com
 #    username: your_username
 #    password: your_password
+# Optional: apply a base expression to every Moloch query.
+#    base_query: ip != 1.2.3.4
     # Don't check Moloch for any  IP sighted more than max_age days ago
 #    max_age: 30
     # Verify the TLS certificate?

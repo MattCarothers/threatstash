@@ -1,6 +1,7 @@
 import datetime
 import dateutil.parser
 import json
+import logging
 import requests
 import urllib
 
@@ -105,6 +106,11 @@ class MolochAPI(threatstash.plugin.Plugin):
         # for the timestamp() method.
         start_time = int(dateutil.parser.parse(start_time).timestamp())
         stop_time  = int(dateutil.parser.parse(stop_time).timestamp())
+
+        # Do we have a default expression?
+        if 'base_query' in self.config:
+            expression = "(%s) && (%s)" % (self.config['base_query'], expression)
+            self.debug("Expression is now", expression)
 
         # Build our query URL
         query_string = urllib.parse.urlencode({
