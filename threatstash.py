@@ -14,7 +14,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     with open(args.config_file[0], 'r') as f:
-        config = yaml.load(f)
+        config = yaml.load(f, Loader=yaml.FullLoader)
 
     if 'global' not in config:
         config['global'] = {}
