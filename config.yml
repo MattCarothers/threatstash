@@ -1,3 +1,4 @@
+##############################
 # Example configuration file #
 ##############################
 
@@ -12,14 +13,14 @@ filter-misp-warning:
 
 # List of plugins to run, and the configuration for each plugin instance
 plugins:
-  # Grab a blog of text from stdin
+  # Grab a block of text from stdin
   - name: input-stdin
 
-  # Parse freeform text, extract indicators, and defang them
+  # Parse freeform text, extract indicators, and refang them
   - name: filter-freeform
 
   # Compare indicators to the MISP warning lists for hostnames
-  # See git clone https://github.com/MISP/misp-warninglists
+  # See https://github.com/MISP/misp-warninglists
   - name: filter-misp-warning
     # Configuration for this instance of this plugin
     # If revoke is set to true, the indicator will be removed.  If set to
