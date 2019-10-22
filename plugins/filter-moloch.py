@@ -76,7 +76,7 @@ class MolochAPI(threatstash.plugin.Plugin):
                             #self.debug("Moloch found", str(sessions['recordsFiltered']), "sessions")
                             if sessions['recordsFiltered'] > 0:
                                 # Unix timestamp of the last packet of the first session
-                                last_seen = sessions['data'][0]['lp']
+                                last_seen = sessions['data'][0]['lastPacket'] / 1000
                                 # Convert to ISO8601
                                 last_seen = datetime.datetime.fromtimestamp(
                                         last_seen,
@@ -128,4 +128,6 @@ class MolochAPI(threatstash.plugin.Plugin):
             )
         if r.status_code != 200:
             raise requests.RequestException("Bad status: " + str(r.status_code) + "\n" + r.text)
+        if r.text[:5] == "ERROR":
+            raise requests.RequestException("Moloch error: " + r.text)
         return r.json(), human_url
