@@ -88,7 +88,8 @@ class MolochAPI(threatstash.plugin.Plugin):
                                         last_seen=last_seen,
                                         sighted_by='moloch',
                                         #refs=['moloch-url', url, 'moloch-session', session_id]
-                                        refs=['moloch-url', url]
+                                        refs=['moloch-url', url],
+                                        count=sessions['recordsFiltered']
                                     )
                                 self.debug("sighted", observable.value, "+",
                                         related_observable.value, "at",

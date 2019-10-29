@@ -225,7 +225,7 @@ class Event():
 
 
     # Add a STIX Sighting to an Event
-    def add_sighting(self, observed_data, first_seen=None, last_seen=None, sighted_by=None, refs=[]):
+    def add_sighting(self, observed_data, first_seen=None, last_seen=None, sighted_by=None, refs=[], count=1):
         """
         Parameters
         ----------
@@ -274,7 +274,8 @@ class Event():
                 custom_properties = { 
                     'sighted_by' : sighted_by
                 },
-                external_references=external_references
+                external_references=external_references,
+                count=count
         )
         self._env.add(s)
         return(s)
