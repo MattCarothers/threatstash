@@ -79,6 +79,8 @@ class Plugin(dict):
     # Return true if this plugin handles the provided IOC type.  If the IOC
     # type list for the plugin is empty, it is assumed to handle all types.
     def handles(self, observable_type):
+        # Normalize to lowercase
+        observable_type = observable_type.lower()
         if not len(self._handles):
             return True
         elif observable_type in self._handles:
