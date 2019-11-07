@@ -17,7 +17,7 @@ class StdoutOutputCSV(threatstash.plugin.Plugin):
         print(','.join([
                     "Type", "Value", "Added By", "Relationship",
                     "Related Type", "Related Value", "Related Added By",
-                    "Sighted", "Sighted By", "Last Seen", "Ref Type", "Ref Value"
+                    "Sighted", "Sighted By", "Sighting Count", "Last Seen", "Ref Type", "Ref Value"
                 ])
             )
         # Iterate across STIX ObservedData objects
@@ -28,12 +28,14 @@ class StdoutOutputCSV(threatstash.plugin.Plugin):
             #self.debug("event.sighted(observable.id) took", str(elapsed), "seconds for", observable.value)
             # Create a unique list of tools that sighted the ObservableData
             sighters = {}
+            sighting_count = 0
             last_seen = ""
             external_reference = ""
             #start = time.time()
             for sighting in event.sightings_of(observable.id):
                 # Record the name of our sighted_by
                 sighters[sighting.sighted_by] = True
+                sighting_count += sighting.count
                 # Record the most recent last_seen date from all sightings
                 if str(sighting.last_seen) > last_seen:
                     last_seen = str(sighting.last_seen)
@@ -76,6 +78,7 @@ class StdoutOutputCSV(threatstash.plugin.Plugin):
                             related_observable.added_by,
                             str(sighted),
                             '|'.join(sighted_by),
+                            str(sighting_count),
                             last_seen,
                             external_reference
                         ]))
@@ -87,6 +90,7 @@ class StdoutOutputCSV(threatstash.plugin.Plugin):
                         "", "", "", "",
                         str(sighted),
                         '|'.join(sighted_by),
+                        str(sighting_count),
                         last_seen,
                         external_reference
                     ]))
