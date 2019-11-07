@@ -1,6 +1,13 @@
 import threatstash.plugin
 
 # Plugin to query the Carbon Black Response API
+#
+# API credentials go in a file named credentials.response located in
+# /etc/carbonblack, $HOME/.carbonblack, or $PWD/.carbonblack
+#
+# See https://developer.carbonblack.com/reference/enterprise-response/authentication/
+# for information on generating an API key and https://cbapi.readthedocs.io/en/latest/
+# for instructions on how to format the file.
 
 __PLUGIN_NAME__ = 'filter-carbon-black-response'
 __PLUGIN_TYPE__ = 'filter'
