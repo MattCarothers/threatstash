@@ -11,7 +11,7 @@ import threatstash.plugin
 
 __PLUGIN_NAME__ = 'filter-carbon-black-response'
 __PLUGIN_TYPE__ = 'filter'
-__IOC_TYPES__ = [ 'ipv4-addr', 'md5', 'sha256' ]
+__IOC_TYPES__ = [ 'domain-name', 'ipv4-addr', 'md5', 'sha256' ]
 __REQUIRED_PARAMETERS__ = [ ]
 
 import cbapi.response as cb
@@ -25,9 +25,10 @@ class CBRFilter(threatstash.plugin.Plugin):
     def run(self, event):
         for observable in event.observables:
             # Observable is an IP?
-            if observable.type == 'ipv4-addr':
+            if observable.type == 'ipv4-addr' or observable.type == 'domain-name':
                 # Issue a CB process query
-                query = 'ipaddr:' + observable.value
+                query = 'ipaddr:' if observable.type == 'ipv4-addr' else 'domain:'
+                query = query + observable.value
                 processes = self.cbr.select(cb.Process).where(query)
                 count = len(processes)
                 if count > 0:
