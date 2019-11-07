@@ -17,6 +17,7 @@ Currently the only input plugin reads from stdin.  Long term this is meant to co
 * FarSight DNSDB - uses the FarSight passive DNS API to derive IP addresses from hostnames
 * Netflow Observed Indicator List (OIL) - See https://github.com/mattcarothers/netflow-oil
 * Moloch - uses the Moloch API to check for sessions matching a domain name when the IP addresses derived from the domain were sighted in OIL
+* Carbon Black Response - uses the CBR API to check for processes matching a hash or communicating with an IP or domain
 
 ### Output
 Currently the only output plugin writes CSV to stdout.  Long term this is meant to deliver alerts to a SIEM or push block lists to firewalls, end point agents, etc.
