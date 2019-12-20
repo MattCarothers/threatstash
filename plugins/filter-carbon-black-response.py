@@ -20,7 +20,10 @@ import cbapi.errors
 class CBRFilter(threatstash.plugin.Plugin):
     def __init__(self, config = {}):
         super().__init__(__PLUGIN_NAME__, __PLUGIN_TYPE__, __IOC_TYPES__, __REQUIRED_PARAMETERS__, config)
-        self.cbr = cb.CbResponseAPI()
+        try:
+            self.cbr = cb.CbResponseAPI()
+        except Exception as e:
+            self.info(str(e))
 
     def run(self, event):
         for observable in event.observables:
