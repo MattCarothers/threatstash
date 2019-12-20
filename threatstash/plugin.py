@@ -98,9 +98,9 @@ class Plugin(dict):
     def run(self, event):
         return event
 
-    def debug(self, *message):
+    def debug(self, *message, exc_info=False):
         message = " ".join(message)
-        logging.debug('[' + self.name + '] ' + message)
+        logging.debug('[' + self.name + '] ' + message, exc_info=exc_info)
 
     def info(self, *message):
         message = " ".join(message)
