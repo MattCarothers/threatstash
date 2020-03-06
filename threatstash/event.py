@@ -139,7 +139,11 @@ class Event():
             target_ref=target,
             relationship_type=relationship_type
         )
-        self._env.add(r)
+
+        # Don't add duplicate relationships
+        if not self._uniq.get(source + target + relationship_type):
+            self._env.add(r)
+            self._uniq[source + target + relationship_type] = True
         return(r)
     
     # Return all the relationships for a given source ObservedData
