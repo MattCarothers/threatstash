@@ -1,5 +1,6 @@
 import json
 import requests
+import time
 
 import threatstash.plugin
 
@@ -15,6 +16,7 @@ class PDNSEnricher(threatstash.plugin.Plugin):
         super().__init__(__PLUGIN_NAME__, __PLUGIN_TYPE__, __IOC_TYPES__, __REQUIRED_PARAMETERS__, config)
 
     def run(self, event):
+        max_age = self.config.get('max_age')
         # Iterate across all the ObservedData objects
         for observable in event.observables:
             # Look for domain-name observables
@@ -24,11 +26,16 @@ class PDNSEnricher(threatstash.plugin.Plugin):
                 for rrset in self.rrset(observable.value):
                     # Iterate across the IPs returned
                     uniq = {}
+                    rrset_age = (time.time() - rrset['time_last']) / 86400
+                    if max_age and rrset_age > max_age:
+                            # This rrset was last seen more than max_age days ago,
+                            # so skip it
+                            continue
                     for rdata in rrset['rdata']:
                         # Skip duplicates
                         if rdata in uniq:
                             continue
-                        self.debug(observable.value + " resolved_to " + rdata)
+                        self.debug(observable.value, "resolved_to", rdata, str(int(rrset_age)), "day(s) ago")
                         # Create a new ObservedData.  If one already exists
                         # with this value, it will be returned instead.
                         new_observed_data = event.add_observation(

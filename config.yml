@@ -38,6 +38,8 @@ plugins:
   # Extract IPs from hostnames using FarSight DNSDB
 #  - name: filter-pdns
 #    apikey: your_key_here
+#    # Optional max age for an rrset.  Ignore any older records.
+#    max_age: 180
 
   # Run indicators past the warning lists that relate to IPs or CIDRs
   - name: filter-misp-warning
