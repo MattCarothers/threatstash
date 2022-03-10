@@ -1,4 +1,6 @@
-from datetime import datetime
+import dateutil.parser
+
+from datetime import datetime, timezone
 
 # STIX 2 SDO
 from stix2 import ObservedData
@@ -69,9 +71,30 @@ class Event():
             return True
         else:
             return False
+    
+    # Create external-references from a list of strings in the form of
+    #   ["source_name1","external_id1","source_name2","external_id2",...]
+    def _create_references(self, refs=[]):
+        if len(refs) % 2 != 0:
+            raise ValueError("refs list cannot have an odd number of items")
+
+        external_references=[]
+        # Run through the refs list two items at a time
+        for source_name, external_id in zip(*[iter(refs)]*2):
+            if '://' in external_id:
+                url = external_id
+            else:
+                url = None
+            external_references.append({
+                    'source_name' : source_name,
+                    'external_id' : external_id,
+                    'url'         : url
+                })
+        return(external_references)
+
 
     # Add an ObservableData object populated with an Observable to an Event
-    def add_observation(self, otype, value, added_by=None):
+    def add_observation(self, otype, value, added_by=None, refs=[]):
         """
         Parameters
         ----------
@@ -81,6 +104,13 @@ class Event():
             The value of the Observable, e.g. "10.0.0.1"
         added_by : string
             Optionally the name of the plugin adding the Observable
+        refs : list
+            List of strings in the form of ["source_name1","external_id1","source_name2","external_id2",...]
+
+            source_name can be the name of a tool or plugin or whatever else is
+            useful to you.  external_id is typically a reference such as an
+            ID string, but you can put anything in it that suits your needs.
+            Example: refs=["moloch-session", "180926-AQDFxWS0hCxPS5uba63ZJZr1"]
         """
 
         # Do we already have an ObservedData containing an Observable with this
@@ -105,15 +135,20 @@ class Event():
             else:
                 raise ValueError("Invalid Observable type: " + otype)
 
+            external_references = self._create_references(refs)
+
             observed_data = ObservedData(
                     first_observed=datetime.utcnow(),
                     last_observed=datetime.utcnow(),
                     number_observed=1,
                     objects = { 0 : observable },
                     custom_properties = { 
-                        'added_by' : added_by
+                        'added_by' : added_by,
+                        'refs' : external_references
                     }
             )
+            #print("Added a new observed_data") # DEBUG
+            #print(observed_data)               # DEBUG
             self._env.add(observed_data)
             self._uniq[value] = observed_data.id
             return(observed_data)
@@ -189,6 +224,10 @@ class Event():
                 continue
             # Get the ObservedData object that is the target of each Relationship
             target_obj = self._env.get(r.target_ref)
+            try:
+                refs = target_obj.refs
+            except:
+                refs = []
             # Get the Observable objects in the ObservedData object
             for observable in target_obj.objects.values():
                 # Create threatstash.Observable objects from the ObservedData,
@@ -201,7 +240,8 @@ class Event():
                                     value,
                                     _id = target_obj.id,
                                     added_by = target_obj.added_by,
-                                    relationship_type = r.relationship_type
+                                    relationship_type = r.relationship_type,
+                                    refs = refs
                                 )
                             )
                 else:
@@ -211,7 +251,8 @@ class Event():
                                 observable.value,
                                 _id = target_obj.id,
                                 added_by = target_obj.added_by,
-                                relationship_type = r.relationship_type
+                                relationship_type = r.relationship_type,
+                                refs = refs
                             )
                         )
         return relationships
@@ -251,25 +292,17 @@ class Event():
         else:
             _id = observed_data.id
 
-        if len(refs) % 2 != 0:
-            raise ValueError("refs list cannot have an odd number of items")
-
-        if refs:
-            external_references=[]
-            # Run through the refs list two items at a time
-            for source_name, external_id in zip(*[iter(refs)]*2):
-                external_references.append({
-                        'source_name' : source_name,
-                        'external_id' : external_id
-                    })
-        else:
-            external_references=None
+        external_references = self._create_references(refs)
 
         # Default to now if no timestamp was given
-        if not first_seen:
-            first_seen = datetime.utcnow()
-        if not last_seen:
-            last_seen = datetime.utcnow()
+        if not first_seen and not last_seen:
+            first_seen = last_seen = datetime.now(timezone.utc)
+
+        if first_seen:
+            first_seen = dateutil.parser.parse(first_seen)
+
+        if last_seen:
+            last_seen = dateutil.parser.parse(last_seen)
 
         s = Sighting(
                 _id,
@@ -361,11 +394,21 @@ class Event():
     @property
     def observables(self):
         """
-        Return all the Observables in all the ObservedData objects in our Environment
+        Return all the Observables in all the ObservedData objects in our
+        Environment
         """
         observables = []
-        for observable_data in self.observations:
-            for observable in observable_data.objects.values():
+        for observed_data in self.observations:
+            #print("event.observables()") # DEBUG
+            #print(observed_data)         # DEBUG
+            try:
+                # Adding custom property to a STIX2 ObservedData with a value
+                # of [] results in the custom property not being added, so we
+                # need a try/except here.
+                refs = observed_data.refs
+            except:
+                refs = []
+            for observable in observed_data.objects.values():
                 # Create threatstash.Observable objects from the ObservedData,
                 # and Observable
                 if observable.type == "file":
@@ -374,8 +417,9 @@ class Event():
                                 threatstash.observable.Observable(
                                     hash_type,
                                     value,
-                                    _id = observable_data.id,
-                                    added_by = observable_data.added_by
+                                    _id = observed_data.id,
+                                    added_by = observed_data.added_by,
+                                    refs = refs
                                 )
                             )
                 else:
@@ -383,8 +427,9 @@ class Event():
                             threatstash.observable.Observable(
                                 observable.type,
                                 observable.value,
-                                _id = observable_data.id,
-                                added_by = observable_data.added_by
+                                _id = observed_data.id,
+                                added_by = observed_data.added_by,
+                                refs = refs
                             )
                         )
         return observables
