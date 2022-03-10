@@ -20,8 +20,10 @@ import cbapi.errors
 class CBRFilter(threatstash.plugin.Plugin):
     def __init__(self, config = {}):
         super().__init__(__PLUGIN_NAME__, __PLUGIN_TYPE__, __IOC_TYPES__, __REQUIRED_PARAMETERS__, config)
+        # If we were given a profile use it.  Otherwise use "default."
+        profile = self.config.get('profile', 'default')
         try:
-            self.cbr = cb.CbResponseAPI()
+            self.cbr = cb.CbResponseAPI(profile=profile)
         except Exception as e:
             self.info(str(e))
 
